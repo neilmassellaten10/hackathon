@@ -463,6 +463,7 @@
         // --- 1. AUTHENTICATION LOGIC & DATA ISOLATION ---
         let activeLoginMode = 'consultant';
         let currentUser = null; 
+        const SESSION_USER_KEY = 'ten10_current_user';
         
         const credentials = {
             "alex.m": { id: "c_1", name: "Alex Mercer", roleKey: "sdet", type: "consultant", password: "pass123" },
@@ -493,6 +494,7 @@
 
             errorDiv.innerText = "";
             document.getElementById('login-form').reset();
+            localStorage.setItem(SESSION_USER_KEY, usernameInput);
             proceedToApp(user);
         }
 
@@ -518,9 +520,21 @@
 
         function logout() {
             currentUser = null;
+            localStorage.removeItem(SESSION_USER_KEY);
             document.getElementById('app-layout').style.display = 'none';
             document.getElementById('login-screen').style.display = 'flex';
             setLoginMode('consultant');
+        }
+
+        function restoreSession() {
+            const savedUsername = localStorage.getItem(SESSION_USER_KEY);
+            const savedUser = savedUsername ? credentials[savedUsername] : null;
+
+            if (savedUser) {
+                proceedToApp(savedUser);
+            } else {
+                localStorage.removeItem(SESSION_USER_KEY);
+            }
         }
 
 
@@ -830,44 +844,58 @@
                     }
 
                     card.innerHTML = `
-                        <div class="skill-title">${skill.name}</div>
-                        <div class="skill-desc">${skill.desc}</div>
-                        
-                        <div class="skill-progress-container">
-                            <div class="progress-header">
-                            <span>Completion Based on Targets</span>
-                            <span id="progress-text-${skill.id}">${progress}%</span>
-                        </div>
-                        <div class="progress-bar-bg">
-                            <div id="progress-fill-${skill.id}" class="progress-bar-fill" style="width: ${progress}%"></div>
-                        </div>
-                        
-                        ${targetsHTML}
-                        </div>
-
-                        <div class="card-actions">
-                            <div class="action-row">
-                                <a href="${skill.link}" target="_blank" class="btn-linkedin">
-                                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                                    LinkedIn Learning
-                                </a>
-                                <select class="status-select ${status}" onchange="updateStatus('${skill.id}', this)">
-                                    <option value="not-started" ${status === 'not-started' ? 'selected' : ''}>Not Started</option>
-                                    <option value="in-progress" ${status === 'in-progress' ? 'selected' : ''}>In Progress</option>
-                                    <option value="complete" ${status === 'complete' ? 'selected' : ''}>Complete ✅</option>
-                                </select>
-                            </div>
-                            
-                            ${status !== 'complete' ? `
-                                <button class="btn-smart" onclick="generateSMART('${skill.id}', '${skill.name}')">
-                                    🎯 Add SMART Target
-                                </button>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <div class="skill-title">${skill.name}</div>
+                            ${status === 'complete' ? `
+                                <button id="collapse-btn-${skill.id}" onclick="toggleSkillCollapse('${skill.id}')" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--brand-blue);">▼</button>
                             ` : ''}
                         </div>
                         
-                        <div id="resources-${skill.id}" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
-                            <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.75rem;">📚 Related Resources</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted);">Loading resources...</div>
+                        <div id="skill-content-${skill.id}">
+                            <div class="skill-desc">${skill.desc}</div>
+                            
+                            <div class="skill-progress-container">
+                                <div class="progress-header">
+                                <span>Completion Based on Targets</span>
+                                <span id="progress-text-${skill.id}">${progress}%</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div id="progress-fill-${skill.id}" class="progress-bar-fill" style="width: ${progress}%"></div>
+                            </div>
+                            
+                            ${targetsHTML}
+                            </div>
+
+                            <div class="card-actions">
+                                <div class="action-row">
+                                    <a href="${skill.link}" target="_blank" class="btn-linkedin">
+                                        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+                                        LinkedIn Learning
+                                    </a>
+                                    <select class="status-select ${status}" onchange="updateStatus('${skill.id}', this)">
+                                        <option value="not-started" ${status === 'not-started' ? 'selected' : ''}>Not Started</option>
+                                        <option value="in-progress" ${status === 'in-progress' ? 'selected' : ''}>In Progress</option>
+                                        <option value="complete" ${status === 'complete' ? 'selected' : ''}>Complete ✅</option>
+                                    </select>
+                                </div>
+                                
+                                ${status !== 'complete' ? `
+                                    <div style="display: flex; gap: 0.5rem; flex-direction: column;">
+                                        <button class="btn-smart" onclick="generateSMART('${skill.id}', '${skill.name}')">
+                                            🎯 AI-Generated Target
+                                        </button>
+                                        <div style="display: flex; gap: 0.5rem;">
+                                            <input type="text" id="custom-target-input-${skill.id}" placeholder="Or create your own..." style="flex: 1; padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; font-family: inherit;">
+                                            <button onclick="addCustomTarget('${skill.id}', '${skill.name}')" style="padding: 0.6rem 1rem; background-color: var(--brand-blue); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem;">Add</button>
+                                        </div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            
+                            <div id="resources-${skill.id}" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                                <div style="font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; margin-bottom: 0.75rem;">📚 Related Resources</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted);">Loading resources...</div>
+                            </div>
                         </div>
                     `;
                     grid.appendChild(card);
@@ -909,10 +937,29 @@
         }
 
         // --- 5. DATA PERSISTENCE & ACTIONS ---
+        function refreshAdminViewIfVisible() {
+            const adminView = document.getElementById('view-admin');
+            if (!adminView.classList.contains('active')) return;
+
+            const selectedConsultantId = document.getElementById('admin-consultant-select').value;
+            if (selectedConsultantId) {
+                renderConsultantProgressView();
+            } else {
+                renderAdminDashboard();
+            }
+        }
+
+        function notifySkillDataChanged() {
+            refreshAdminViewIfVisible();
+        }
+
         function updateStatus(skillId, selectElement) {
             const value = selectElement.value;
             localStorage.setItem(`status_${currentUser.id}_${skillId}`, value);
+            const progress = value === 'complete' ? 100 : value === 'in-progress' ? 50 : 0;
+            localStorage.setItem(`progress_${currentUser.id}_${skillId}`, progress);
             renderConsultantMatrix(); 
+            notifySkillDataChanged();
         }
 
         function toggleTarget(skillId, targetIndex) {
@@ -924,6 +971,33 @@
             
             localStorage.setItem(`smart_${currentUser.id}_${skillId}`, JSON.stringify(targets));
             renderConsultantMatrix(); // Re-render to update the progress bar and status
+            notifySkillDataChanged();
+        }
+
+        function addCustomTarget(skillId, skillName) {
+            const customInput = document.getElementById(`custom-target-input-${skillId}`);
+            const customText = customInput.value.trim();
+            
+            if (!customText) {
+                alert('Please enter a target');
+                return;
+            }
+            
+            // Get existing array or default to empty array
+            const targetsJSON = localStorage.getItem(`smart_${currentUser.id}_${skillId}`);
+            let targets = [];
+            if (targetsJSON) {
+                try { targets = JSON.parse(targetsJSON); } catch(e) { targets = []; }
+            }
+            
+            // Append new custom goal
+            targets.push({ text: customText, completed: false });
+            
+            // Save stringified array
+            localStorage.setItem(`smart_${currentUser.id}_${skillId}`, JSON.stringify(targets));
+            customInput.value = '';
+            renderConsultantMatrix();
+            notifySkillDataChanged();
         }
 
         function generateSMART(skillId, skillName) {
@@ -955,35 +1029,75 @@
             // Save stringified array
             localStorage.setItem(`smart_${currentUser.id}_${skillId}`, JSON.stringify(targets));
             renderConsultantMatrix();
+            notifySkillDataChanged();
         }
 
         // --- 6. ACADEMY LEAD DASHBOARD RENDERER ---
         function renderAdminDashboard() {
             // Set all titles to team view
             document.getElementById('heatmap-title').textContent = 'Team Skill Gap Heatmap';
-            document.getElementById('heatmap-subtitle').textContent = 'Aggregated proficiency across the current selected discipline. Red indicates critical knowledge gaps across the team.';
+            document.getElementById('heatmap-subtitle').textContent = 'Aggregated progress by discipline. Expand a discipline to inspect progress across its skills.';
             document.getElementById('targets-title').textContent = 'Active SMART Targets';
             document.getElementById('targets-subtitle').textContent = 'Live feed of goals committed by your team.';
             
             const heatmapContainer = document.getElementById('heatmap-container');
             heatmapContainer.innerHTML = '';
 
-            const exampleRole = roleData["sdet"]; 
             document.getElementById('admin-role-label').innerText = "SDET";
+            const consultants = Object.values(credentials).filter(u => u.type === 'consultant');
             
-            exampleRole.skills.forEach(skill => {
-                let coverage = 30 + Math.floor(Math.random() * 50); 
-                let barClass = coverage < 40 ? 'critical' : coverage < 60 ? 'warning' : '';
+            Object.entries(roleData).forEach(([roleKey, role]) => {
+                const skillProgress = role.skills.map(skill => {
+                    const totalProgress = consultants.reduce((sum, consultant) => {
+                        const storedProgress = localStorage.getItem(`progress_${consultant.id}_${skill.id}`);
+                        const storedStatus = localStorage.getItem(`status_${consultant.id}_${skill.id}`);
+                        const fallbackProgress = storedStatus === 'complete' ? 100 : storedStatus === 'in-progress' ? 50 : 0;
+                        return sum + (storedProgress !== null ? Number(storedProgress) : fallbackProgress);
+                    }, 0);
+                    return {
+                        ...skill,
+                        progress: consultants.length > 0 ? Math.round(totalProgress / consultants.length) : 0
+                    };
+                });
+                const disciplineProgress = skillProgress.length > 0
+                    ? Math.round(skillProgress.reduce((sum, skill) => sum + skill.progress, 0) / skillProgress.length)
+                    : 0;
+                const barClass = disciplineProgress < 40 ? 'critical' : disciplineProgress < 60 ? 'warning' : '';
 
-                const item = document.createElement('div');
+                const item = document.createElement('details');
                 item.className = 'heatmap-item';
+                item.style.border = '1px solid var(--border)';
+                item.style.borderRadius = '8px';
+                item.style.padding = '1rem';
+                item.style.backgroundColor = '#F8FAFC';
                 item.innerHTML = `
-                    <div class="heatmap-header">
-                        <span>${skill.name} <span style="color:#64748B; font-weight:normal;">(${skill.level})</span></span>
-                        <span>${coverage}% Team Proficiency</span>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill ${barClass}" style="width: ${coverage}%"></div>
+                    <summary style="cursor: pointer; list-style: none;">
+                        <div class="heatmap-header">
+                            <span>${role.title}</span>
+                            <span>${disciplineProgress}% Discipline Progress</span>
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.6rem;">
+                            ${consultants.length} consultant${consultants.length === 1 ? '' : 's'} tracked
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill ${barClass}" style="width: ${disciplineProgress}%"></div>
+                        </div>
+                    </summary>
+                    <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.9rem;">
+                        ${skillProgress.map(skill => {
+                            const skillBarClass = skill.progress < 40 ? 'critical' : skill.progress < 60 ? 'warning' : '';
+                            return `
+                                <div>
+                                    <div class="heatmap-header">
+                                        <span>${skill.name} <span style="color:#64748B; font-weight:normal;">(${skill.level})</span></span>
+                                        <span>${skill.progress}%</span>
+                                    </div>
+                                    <div class="progress-bar-bg">
+                                        <div class="progress-bar-fill ${skillBarClass}" style="width: ${skill.progress}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
                     </div>
                 `;
                 heatmapContainer.appendChild(item);
@@ -994,34 +1108,34 @@
             targetsContainer.innerHTML = '';
             let count = 0;
 
-            Object.values(credentials).filter(u => u.type === 'consultant').forEach(consultant => {
-                const assignedRole = roleData[consultant.roleKey];
-                
-                assignedRole.skills.forEach(skill => {
-                    const targetsJSON = localStorage.getItem(`smart_${consultant.id}_${skill.id}`);
-                    
-                    if (targetsJSON) {
-                        let targets = [];
-                        try { targets = JSON.parse(targetsJSON); } catch(e) { targets = []; }
+            consultants.forEach(consultant => {
+                Object.values(roleData).forEach(role => {
+                    role.skills.forEach(skill => {
+                        const targetsJSON = localStorage.getItem(`smart_${consultant.id}_${skill.id}`);
                         
-                        targets.forEach(target => {
-                            // Only show uncompleted targets on the admin dashboard
-                            if (!target.completed) {
-                                count++;
-                                const t = document.createElement('div');
-                                t.style.padding = "1rem";
-                                t.style.border = "1px solid var(--border)";
-                                t.style.borderRadius = "8px";
-                                t.style.marginBottom = "1rem";
-                                t.style.backgroundColor = "#F8FAFC";
-                                t.innerHTML = `
-                                    <div style="font-size:0.8rem; color:var(--brand-blue); font-weight:700; text-transform:uppercase; margin-bottom:0.3rem;">${consultant.name} • ${skill.name}</div>
-                                    <div style="font-size:0.95rem; color:var(--text-main); font-style:italic;">"${target.text}"</div>
-                                `;
-                                targetsContainer.appendChild(t);
-                            }
-                        });
-                    }
+                        if (targetsJSON) {
+                            let targets = [];
+                            try { targets = JSON.parse(targetsJSON); } catch(e) { targets = []; }
+                            
+                            targets.forEach(target => {
+                                // Only show uncompleted targets on the admin dashboard
+                                if (!target.completed) {
+                                    count++;
+                                    const t = document.createElement('div');
+                                    t.style.padding = "1rem";
+                                    t.style.border = "1px solid var(--border)";
+                                    t.style.borderRadius = "8px";
+                                    t.style.marginBottom = "1rem";
+                                    t.style.backgroundColor = "#F8FAFC";
+                                    t.innerHTML = `
+                                        <div style="font-size:0.8rem; color:var(--brand-blue); font-weight:700; text-transform:uppercase; margin-bottom:0.3rem;">${consultant.name} • ${role.title} • ${skill.name}</div>
+                                        <div style="font-size:0.95rem; color:var(--text-main); font-style:italic;">"${target.text}"</div>
+                                    `;
+                                    targetsContainer.appendChild(t);
+                                }
+                            });
+                        }
+                    });
                 });
             });
 
@@ -1029,6 +1143,8 @@
                 targetsContainer.innerHTML = `<p style="color:var(--text-muted); font-style:italic;">No active uncompleted goals across the team.</p>`;
             }
         }
+
+        restoreSession();
 
     </script>
 </body>
