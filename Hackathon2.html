@@ -5,7 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ten10 Skills Matrix</title>
     <style>
-        /* Modern Color Palette & Variables */
+        /*
+            PRESENTATION NOTE:
+            This is a single-file prototype. HTML, CSS, mock data, and JavaScript live
+            together so the app can be opened directly in a browser during the demo.
+        */
+
+        /*
+            Theme variables:
+            The rest of the CSS references these custom properties so colors stay
+            consistent across login, consultant cards, dashboards, and progress bars.
+        */
         :root {
             --brand-dark: #2D1B4E;
             --brand-blue: #7C3AED;
@@ -38,6 +48,10 @@
         /* ========================================= */
         /* LOGIN SCREEN STYLES                       */
         /* ========================================= */
+        /*
+            Login is an overlay shown first. Once authentication succeeds, JavaScript
+            hides #login-screen and displays #app-layout.
+        */
         #login-screen {
             position: fixed; inset: 0; background-color: var(--brand-dark);
             display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100;
@@ -79,12 +93,20 @@
         }
         .demo-creds span { color: white; font-weight: 600; }
 
-        /* App Layout Wrapper */
+        /*
+            Main app wrapper:
+            Hidden by default so unauthenticated users only see the login screen.
+        */
         #app-layout { display: none; width: 100%; height: 100%; }
 
         /* ========================================= */
         /* MAIN APPLICATION STYLES                   */
         /* ========================================= */
+        /*
+            After login, the app becomes a two-panel layout:
+            - sidebar: navigation, consultant selector, logout
+            - main-content: consultant portal or academy lead dashboard
+        */
         .sidebar {
             width: 280px;
             background-color: var(--brand-dark);
@@ -260,11 +282,26 @@
         .btn-smart {
             background-color: var(--brand-light); color: var(--brand-blue); border: 1px dashed var(--brand-blue);
             padding: 0.6rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
-            text-align: center; transition: all 0.2s; width: 100%;
+            text-align: center; transition: all 0.2s; width: 100%; min-height: 42px;
         }
         .btn-smart:hover { background-color: var(--brand-blue); color: white; }
 
-        /* SMART Target Checklist Styles */
+        .custom-target-row { display: flex; gap: 0.5rem; }
+        .custom-target-input {
+            flex: 1; min-height: 42px; padding: 0.6rem; border: 1px solid var(--border);
+            border-radius: 6px; font-size: 0.9rem; font-family: inherit;
+        }
+        .btn-add-target {
+            min-height: 42px; padding: 0.6rem 1rem; background-color: var(--brand-blue);
+            color: white; border: none; border-radius: 6px; cursor: pointer;
+            font-weight: 600; font-size: 0.9rem;
+        }
+
+        /*
+            SMART target checklist:
+            These styles are used inside each skill card after a consultant creates
+            generated or custom development targets.
+        */
         .smart-target-list {
             list-style: none;
             padding: 0;
@@ -309,7 +346,11 @@
         .heatmap-item { margin-bottom: 1.2rem; }
         .heatmap-header { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.4rem; }
         
-        /* Progress Bar Styles */
+        /*
+            Shared progress bars:
+            Used by consultant skill cards, individual consultant admin views, and
+            the team-wide academy lead dashboard. Color classes flag lower progress.
+        */
         .skill-progress-container {
             margin-top: 1rem;
             margin-bottom: 1rem;
@@ -333,6 +374,11 @@
 </head>
 <body>
 
+    <!--
+        LOGIN SCREEN:
+        Users choose whether they are signing in as a Consultant or Academy Lead.
+        The JavaScript validates against the mock credentials object below.
+    -->
     <div id="login-screen">
         <div class="login-card">
             <h1>Ten10 Platform</h1>
@@ -359,6 +405,10 @@
             </form>
         </div>
 
+        <!--
+            Demo-only helper credentials. In a production build, these would be
+            replaced by real authentication and should not be shown on the page.
+        -->
         <div class="demo-creds">
             <strong>Mock Credentials for Testing (Password: pass123):</strong><br><br>
             Consultant 1 (SDET): <span>alex.m</span><br>
@@ -368,12 +418,22 @@
         </div>
     </div>
 
+    <!--
+        APPLICATION SHELL:
+        This appears after login. Both the consultant portal and admin dashboard
+        live in this shell, and switchView(...) toggles which section is visible.
+    -->
     <div id="app-layout">
         <aside class="sidebar">
             <div class="brand">Ten10</div>
             <button class="nav-btn active" id="btn-consultant" onclick="switchView('consultant')">Consultant Portal</button>
             <button class="nav-btn" id="btn-admin" onclick="switchView('admin')">Academy Lead</button>
             
+            <!--
+                Admin-only dropdown:
+                Hidden for consultants. When an Academy Lead selects a consultant,
+                renderConsultantProgressView() shows that person's progress.
+            -->
             <div id="consultant-selector" style="display:none; margin-top: 1.5rem; padding: 0 0.5rem;">
                 <label style="font-size: 0.75rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; display: block; margin-bottom: 0.5rem;">Select Consultant</label>
                 <select id="admin-consultant-select" onchange="renderConsultantProgressView()" style="width: 100%; padding: 0.6rem; border: 2px solid var(--brand-blue); border-radius: 6px; background-color: white; color: var(--text-main); font-size: 0.9rem; font-weight: 600; cursor: pointer;">
@@ -386,6 +446,11 @@
 
         <main class="main-content">
 
+            <!--
+                CONSULTANT PORTAL:
+                Consultants choose a discipline and renderConsultantMatrix()
+                builds the skill cards dynamically from roleData.
+            -->
             <section id="view-consultant" class="view-section active">
                 <h1>Your Development Roadmap</h1>
                 <p class="subtitle">Evaluate your current standing and map your route to the next level.</p>
@@ -408,10 +473,16 @@
                     </div>
                 </div>
 
+                <!-- Skill cards are injected here by renderConsultantMatrix(). -->
                 <div id="matrix-container">
                     </div>
             </section>
 
+            <!--
+                ACADEMY LEAD DASHBOARD:
+                Shows team-wide progress by discipline, or an individual
+                consultant view when selected in the sidebar dropdown.
+            -->
             <section id="view-admin" class="view-section">
                 <h1>Academy Lead Dashboard</h1>
                 <p class="subtitle">Global oversight of team skill gaps and active development targets.</p>
@@ -422,6 +493,7 @@
                         <p id="heatmap-subtitle" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
                             Aggregated proficiency across the current selected discipline. Red indicates critical knowledge gaps across the team.
                         </p>
+                        <!-- Team or individual progress rows are injected here. -->
                         <div id="heatmap-container">
                             </div>
                     </div>
@@ -448,6 +520,7 @@
                             <p id="targets-subtitle" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
                                 Live feed of goals committed by your team.
                             </p>
+                            <!-- Active SMART targets are injected here. -->
                             <div id="admin-targets-container">
                                 </div>
                         </div>
@@ -461,10 +534,27 @@
 
     <script>
         // --- 1. AUTHENTICATION LOGIC & DATA ISOLATION ---
+        /*
+            App state and storage keys:
+            - activeLoginMode controls which login tab is selected.
+            - currentUser is the signed-in user for this tab.
+            - skill data remains in localStorage so browser tabs can share it.
+            - session data uses sessionStorage so separate tabs can stay logged in
+              as different people during a demo.
+        */
         let activeLoginMode = 'consultant';
         let currentUser = null; 
         const SESSION_USER_KEY = 'ten10_current_user';
+        const SKILL_DATA_PREFIXES = ['smart_', 'status_', 'progress_'];
+        const skillUpdateChannel = 'BroadcastChannel' in window ? new BroadcastChannel('ten10_skill_updates') : null;
+        let lastSkillDataSnapshot = '';
         
+        /*
+            Mock users:
+            This replaces a real identity provider for the prototype. The user id
+            becomes part of localStorage keys, which keeps each consultant's skill
+            progress separate.
+        */
         const credentials = {
             "alex.m": { id: "c_1", name: "Alex Mercer", roleKey: "sdet", type: "consultant", password: "pass123" },
             "sarah.j": { id: "c_2", name: "Sarah Jenkins", roleKey: "devops", type: "consultant", password: "pass123" },
@@ -472,6 +562,11 @@
             "admin": { id: "admin", name: "Marcus Lead", type: "admin", password: "admin123" }
         };
 
+        /*
+            Switches the login form between Consultant and Academy Lead modes.
+            handleLogin uses activeLoginMode to prevent a consultant account from
+            entering the admin dashboard.
+        */
         function setLoginMode(mode) {
             activeLoginMode = mode;
             document.getElementById('login-error').innerText = '';
@@ -480,6 +575,11 @@
             document.getElementById('login-btn-text').innerText = mode === 'admin' ? 'Log In as Academy Lead' : 'Log In as Consultant';
         }
 
+        /*
+            Login form handler:
+            Validates the username/password against mock data, saves this tab's
+            session, then calls proceedToApp() to show the correct portal.
+        */
         function handleLogin(event) {
             event.preventDefault();
             const usernameInput = document.getElementById('username').value.trim();
@@ -494,10 +594,15 @@
 
             errorDiv.innerText = "";
             document.getElementById('login-form').reset();
-            localStorage.setItem(SESSION_USER_KEY, usernameInput);
+            saveSession(usernameInput);
             proceedToApp(user);
         }
 
+        /*
+            Central post-login router:
+            Consultant users land on the consultant portal with their default role
+            selected. Admin users land on the Academy Lead dashboard.
+        */
         function proceedToApp(user) {
             currentUser = user;
             document.getElementById('login-screen').style.display = 'none';
@@ -518,27 +623,57 @@
             }
         }
 
+        /*
+            Logout clears only the current tab's session. Skill progress is not
+            cleared, because it represents the saved development data.
+        */
         function logout() {
             currentUser = null;
-            localStorage.removeItem(SESSION_USER_KEY);
+            clearSession();
             document.getElementById('app-layout').style.display = 'none';
             document.getElementById('login-screen').style.display = 'flex';
             setLoginMode('consultant');
         }
 
+        /*
+            Session helpers:
+            sessionStorage keeps each browser tab independent. The localStorage
+            fallback exists only to migrate older sessions created before this change.
+        */
+        function saveSession(username) {
+            sessionStorage.setItem(SESSION_USER_KEY, username);
+            localStorage.removeItem(SESSION_USER_KEY);
+        }
+
+        function clearSession() {
+            sessionStorage.removeItem(SESSION_USER_KEY);
+            localStorage.removeItem(SESSION_USER_KEY);
+        }
+
+        /*
+            Called once at the end of the script so refreshing the page keeps the
+            same tab logged in as the same user.
+        */
         function restoreSession() {
-            const savedUsername = localStorage.getItem(SESSION_USER_KEY);
+            const savedUsername = sessionStorage.getItem(SESSION_USER_KEY) || localStorage.getItem(SESSION_USER_KEY);
             const savedUser = savedUsername ? credentials[savedUsername] : null;
 
             if (savedUser) {
+                saveSession(savedUsername);
                 proceedToApp(savedUser);
             } else {
-                localStorage.removeItem(SESSION_USER_KEY);
+                clearSession();
             }
         }
 
 
         // --- 2B. OPEN LIBRARY API INTEGRATION ---
+        /*
+            Learning resource lookup:
+            Each skill card calls this asynchronously after rendering. It searches
+            OpenLibrary by skill name and displays a few related books/resources.
+            If the request fails, the rest of the app still works.
+        */
         async function fetchSkillResources(skillName) {
             try {
                 const response = await fetch(
@@ -561,6 +696,12 @@
         }
 
         // --- 2. EXTENSIVE ROLE-SPECIFIC DATA ---
+        /*
+            Skills catalogue:
+            This is the source of truth for the disciplines, levels, skill names,
+            descriptions, and LinkedIn Learning links. Both the consultant portal
+            and admin dashboard render from this same object, which keeps them in sync.
+        */
         const roleData = {
             "sdet": {
                 title: "Software Dev Engineer in Test (SDET)",
@@ -619,6 +760,12 @@
         };
 
         // --- 3. VIEW NAVIGATION ---
+        /*
+            Top-level view switcher:
+            The sidebar buttons call this to show either the consultant portal or
+            the Academy Lead dashboard. It also decides whether the admin-only
+            consultant selector should be visible.
+        */
         function switchView(viewId) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
@@ -642,6 +789,10 @@
             }
         }
 
+        /*
+            Populates the Academy Lead dropdown from the mock users. It deliberately
+            filters out the admin account so only consultants can be selected.
+        */
         function populateConsultantSelector() {
             const select = document.getElementById('admin-consultant-select');
             const consultants = Object.values(credentials).filter(u => u.type === 'consultant');
@@ -660,6 +811,12 @@
             });
         }
 
+        /*
+            Individual consultant admin view:
+            When an Academy Lead selects a consultant, this renders that consultant's
+            progress across every discipline and every skill. It reads the same
+            localStorage keys that consultant skill cards write.
+        */
         function renderConsultantProgressView() {
             const selectedConsultantId = document.getElementById('admin-consultant-select').value;
             
@@ -674,7 +831,7 @@
                 return;
             }
             
-            // Find the selected consultant
+            // Find the selected consultant from the mock credentials database.
             const consultant = Object.values(credentials).find(u => u.id === selectedConsultantId);
             if (!consultant) return;
             
@@ -683,7 +840,7 @@
             
             // Update titles
             document.getElementById('heatmap-title').textContent = `${consultant.name} - Skill Progress`;
-            document.getElementById('heatmap-subtitle').textContent = `Tracking progress across ${consultant.name}'s ${consultant.roleKey.toUpperCase()} skills.`;
+            document.getElementById('heatmap-subtitle').textContent = `Tracking progress across all disciplines for ${consultant.name}.`;
             document.getElementById('targets-title').textContent = `${consultant.name} - Active Goals`;
             document.getElementById('targets-subtitle').textContent = `SMART targets currently being worked on.`;
             
@@ -693,39 +850,76 @@
             const targetsContainer = document.getElementById('admin-targets-container');
             targetsContainer.innerHTML = '';
             
-            const role = roleData[consultant.roleKey];
-            
-            // Render skills with progress for this consultant
+            /*
+                Discipline/skill progress model:
+                For each skill, targets are the most detailed source of truth.
+                If no targets exist, we fall back to saved manual status/progress.
+            */
             const skillsContainer = document.createElement('div');
             skillsContainer.style.display = 'flex';
             skillsContainer.style.flexDirection = 'column';
-            skillsContainer.style.gap = '1.5rem';
+            skillsContainer.style.gap = '1rem';
             
-            role.skills.forEach(skill => {
-                const targetsJSON = localStorage.getItem(`smart_${consultant.id}_${skill.id}`);
-                let targets = [];
-                if (targetsJSON) {
-                    try { targets = JSON.parse(targetsJSON); } catch(e) { targets = []; }
-                }
-                
-                const completedCount = targets.filter(t => t.completed).length;
-                const progress = targets.length > 0 ? Math.round((completedCount / targets.length) * 100) : 0;
-                
-                const item = document.createElement('div');
+            Object.values(roleData).forEach(role => {
+                const skillProgress = role.skills.map(skill => {
+                    const targetsJSON = localStorage.getItem(`smart_${consultant.id}_${skill.id}`);
+                    let targets = [];
+                    if (targetsJSON) {
+                        try { targets = JSON.parse(targetsJSON); } catch(e) { targets = []; }
+                    }
+                    
+                    const completedCount = targets.filter(t => t.completed).length;
+                    const storedProgress = localStorage.getItem(`progress_${consultant.id}_${skill.id}`);
+                    const storedStatus = localStorage.getItem(`status_${consultant.id}_${skill.id}`);
+                    const fallbackProgress = storedStatus === 'complete' ? 100 : storedStatus === 'in-progress' ? 50 : 0;
+                    const progress = targets.length > 0
+                        ? Math.round((completedCount / targets.length) * 100)
+                        : storedProgress !== null ? Number(storedProgress) : fallbackProgress;
+
+                    return { ...skill, targets, completedCount, progress };
+                });
+                const disciplineProgress = skillProgress.length > 0
+                    ? Math.round(skillProgress.reduce((sum, skill) => sum + skill.progress, 0) / skillProgress.length)
+                    : 0;
+                const barClass = disciplineProgress < 40 ? 'critical' : disciplineProgress < 60 ? 'warning' : '';
+
+                const item = document.createElement('details');
                 item.className = 'heatmap-item';
+                item.style.border = '1px solid var(--border)';
+                item.style.borderRadius = '8px';
+                item.style.padding = '1rem';
+                item.style.backgroundColor = '#F8FAFC';
                 item.innerHTML = `
-                    <div class="heatmap-header">
-                        <div>
-                            <div style="font-weight: 700; color: var(--text-main);">${skill.name}</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted);">${skill.level}</div>
+                    <summary style="cursor: pointer; list-style: none;">
+                        <div class="heatmap-header">
+                            <span>${role.title}</span>
+                            <span>${disciplineProgress}% Discipline Progress</span>
                         </div>
-                        <div style="text-align: right;">
-                            <div style="font-weight: 700; color: var(--brand-blue);">${progress}%</div>
-                            <div style="font-size: 0.85rem; color: var(--text-muted);">${completedCount}/${targets.length} targets</div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill ${barClass}" style="width: ${disciplineProgress}%"></div>
                         </div>
-                    </div>
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" style="width: ${progress}%"></div>
+                    </summary>
+                    <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.9rem;">
+                        ${skillProgress.map(skill => {
+                            const skillBarClass = skill.progress < 40 ? 'critical' : skill.progress < 60 ? 'warning' : '';
+                            return `
+                                <div>
+                                    <div class="heatmap-header">
+                                        <div>
+                                            <div style="font-weight: 700; color: var(--text-main);">${skill.name}</div>
+                                            <div style="font-size: 0.85rem; color: var(--text-muted);">${skill.level}</div>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <div style="font-weight: 700; color: var(--brand-blue);">${skill.progress}%</div>
+                                            <div style="font-size: 0.85rem; color: var(--text-muted);">${skill.completedCount}/${skill.targets.length} targets</div>
+                                        </div>
+                                    </div>
+                                    <div class="progress-bar-bg">
+                                        <div class="progress-bar-fill ${skillBarClass}" style="width: ${skill.progress}%"></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
                     </div>
                 `;
                 skillsContainer.appendChild(item);
@@ -733,32 +927,38 @@
             
             container.appendChild(skillsContainer);
             
-            // Show SMART targets for this consultant
+            /*
+                Active goals feed for this consultant:
+                Scans every discipline so goals still appear even if the consultant
+                worked outside their default assigned discipline.
+            */
             let targetCount = 0;
-            role.skills.forEach(skill => {
-                const targetsJSON = localStorage.getItem(`smart_${consultant.id}_${skill.id}`);
-                
-                if (targetsJSON) {
-                    let targets = [];
-                    try { targets = JSON.parse(targetsJSON); } catch(e) { targets = []; }
+            Object.values(roleData).forEach(role => {
+                role.skills.forEach(skill => {
+                    const targetsJSON = localStorage.getItem(`smart_${consultant.id}_${skill.id}`);
                     
-                    targets.forEach(target => {
-                        if (!target.completed) {
-                            targetCount++;
-                            const t = document.createElement('div');
-                            t.style.padding = "1rem";
-                            t.style.border = "1px solid var(--border)";
-                            t.style.borderRadius = "8px";
-                            t.style.marginBottom = "1rem";
-                            t.style.backgroundColor = "#F8FAFC";
-                            t.innerHTML = `
-                                <div style="font-size:0.8rem; color:var(--brand-blue); font-weight:700; text-transform:uppercase; margin-bottom:0.3rem;">${skill.name}</div>
-                                <div style="font-size:0.95rem; color:var(--text-main); font-style:italic;">"${target.text}"</div>
-                            `;
-                            targetsContainer.appendChild(t);
-                        }
-                    });
-                }
+                    if (targetsJSON) {
+                        let targets = [];
+                        try { targets = JSON.parse(targetsJSON); } catch(e) { targets = []; }
+                        
+                        targets.forEach(target => {
+                            if (!target.completed) {
+                                targetCount++;
+                                const t = document.createElement('div');
+                                t.style.padding = "1rem";
+                                t.style.border = "1px solid var(--border)";
+                                t.style.borderRadius = "8px";
+                                t.style.marginBottom = "1rem";
+                                t.style.backgroundColor = "#F8FAFC";
+                                t.innerHTML = `
+                                    <div style="font-size:0.8rem; color:var(--brand-blue); font-weight:700; text-transform:uppercase; margin-bottom:0.3rem;">${role.title} • ${skill.name}</div>
+                                    <div style="font-size:0.95rem; color:var(--text-main); font-style:italic;">"${target.text}"</div>
+                                `;
+                                targetsContainer.appendChild(t);
+                            }
+                        });
+                    }
+                });
             });
             
             if (targetCount === 0) {
@@ -767,6 +967,16 @@
         }
 
         // --- 4. CONSULTANT VIEW RENDERER ---
+        /*
+            Consultant skill matrix:
+            This is the main work surface for consultants. It reads the selected
+            discipline, groups skills by level, and creates cards with:
+            - skill description
+            - progress bar
+            - SMART target checklist
+            - LinkedIn/OpenLibrary resources
+            - status and target controls
+        */
         function renderConsultantMatrix() {
             const roleKey = document.getElementById('role-select').value;
             const role = roleData[roleKey];
@@ -790,15 +1000,25 @@
 
                 levelSkills.forEach(async skill => {
                     
-                    // Fetch targets as JSON array
+                    /*
+                        Targets are stored as an array per consultant/skill:
+                        smart_{consultantId}_{skillId} = [{ text, completed }]
+                    */
                     const targetsJSON = localStorage.getItem(`smart_${currentUser.id}_${skill.id}`);
                     let targets = [];
                     if (targetsJSON) {
                         try { targets = JSON.parse(targetsJSON); } catch(e) { targets = []; }
                     }
 
-                    // Dynamically compute progress based on targets checklist
-                    let progress = 0;
+                    const savedStatus = localStorage.getItem(`status_${currentUser.id}_${skill.id}`) || 'not-started';
+
+                    /*
+                        Progress logic:
+                        - If checklist targets exist, progress is completed/total.
+                        - If no targets exist, progress comes from manual status.
+                        This keeps status-only updates visible in the admin dashboard.
+                    */
+                    let progress = savedStatus === 'complete' ? 100 : savedStatus === 'in-progress' ? 50 : 0;
                     if (targets.length > 0) {
                         const completedCount = targets.filter(t => t.completed).length;
                         progress = Math.round((completedCount / targets.length) * 100);
@@ -810,14 +1030,19 @@
                         localStorage.setItem(`status_${currentUser.id}_${skill.id}`, newStatus);
                     }
                     
-                    // Save progress back so Admin Dashboard can potentially read it
+                    // Save progress back so admin views can aggregate it.
                     localStorage.setItem(`progress_${currentUser.id}_${skill.id}`, progress);
                     
-                    const status = localStorage.getItem(`status_${currentUser.id}_${skill.id}`) || 'not-started';
+                    const status = localStorage.getItem(`status_${currentUser.id}_${skill.id}`) || savedStatus;
                     const card = document.createElement('div');
                     card.className = 'skill-card';
                     
-                    // Generate HTML for the checklist (deduplicate targets)
+                    /*
+                        Generate checklist HTML:
+                        Targets can be generated multiple times, so this removes
+                        duplicate text while preserving the original array index for
+                        toggle/delete actions.
+                    */
                     let targetsHTML = '';
                     if (targets.length > 0) {
                         // Remove duplicate targets based on text content
@@ -837,6 +1062,7 @@
                                 <li class="smart-target-item ${t.completed ? 'completed' : ''}">
                                     <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTarget('${skill.id}', ${t.originalIndex})">
                                     <span style="font-size: 0.9rem; line-height: 1.4;">${t.text}</span>
+                                    <button onclick="deleteTarget('${skill.id}', ${t.originalIndex})" title="Delete target" style="margin-left: auto; background: transparent; border: none; color: var(--danger); cursor: pointer; font-size: 1rem; font-weight: 700; line-height: 1;">x</button>
                                 </li>
                             `;
                         });
@@ -884,9 +1110,9 @@
                                         <button class="btn-smart" onclick="generateSMART('${skill.id}', '${skill.name}')">
                                             🎯 AI-Generated Target
                                         </button>
-                                        <div style="display: flex; gap: 0.5rem;">
-                                            <input type="text" id="custom-target-input-${skill.id}" placeholder="Or create your own..." style="flex: 1; padding: 0.6rem; border: 1px solid var(--border); border-radius: 6px; font-size: 0.9rem; font-family: inherit;">
-                                            <button onclick="addCustomTarget('${skill.id}', '${skill.name}')" style="padding: 0.6rem 1rem; background-color: var(--brand-blue); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.9rem;">Add</button>
+                                        <div class="custom-target-row">
+                                            <input type="text" id="custom-target-input-${skill.id}" class="custom-target-input" placeholder="Or create your own...">
+                                            <button class="btn-add-target" onclick="addCustomTarget('${skill.id}', '${skill.name}')">Add</button>
                                         </div>
                                     </div>
                                 ` : ''}
@@ -900,7 +1126,10 @@
                     `;
                     grid.appendChild(card);
                     
-                    // Fetch and display resources asynchronously
+                    /*
+                        Resource cards load after the skill card appears. This keeps
+                        the matrix usable even if the API is slow or unavailable.
+                    */
                     fetchSkillResources(skill.name).then(resources => {
                         const resourcesContainer = document.getElementById(`resources-${skill.id}`);
                         if (resourcesContainer) {
@@ -937,6 +1166,12 @@
         }
 
         // --- 5. DATA PERSISTENCE & ACTIONS ---
+        /*
+            Admin refresh helper:
+            Many actions update localStorage. After each update, this function checks
+            whether the admin dashboard is currently open and re-renders the right
+            admin view: all consultants or a selected individual consultant.
+        */
         function refreshAdminViewIfVisible() {
             const adminView = document.getElementById('view-admin');
             if (!adminView.classList.contains('active')) return;
@@ -949,10 +1184,71 @@
             }
         }
 
+        /*
+            Change broadcaster:
+            Called after any consultant skill data changes. BroadcastChannel helps
+            other same-browser tabs hear about updates. The polling fallback below
+            exists because local HTML demos can make browser events inconsistent.
+        */
         function notifySkillDataChanged() {
+            refreshAdminViewIfVisible();
+            if (skillUpdateChannel) {
+                skillUpdateChannel.postMessage({ type: 'skill-data-changed' });
+            }
+        }
+
+        // Identifies which localStorage keys belong to skill progress data.
+        function isSkillDataKey(key) {
+            return key && SKILL_DATA_PREFIXES.some(prefix => key.startsWith(prefix));
+        }
+
+        /*
+            Snapshot polling:
+            Creates a compact string of all skill-related storage values. If it
+            changes, the admin page knows consultant progress has changed somewhere.
+        */
+        function getSkillDataSnapshot() {
+            return Object.keys(localStorage)
+                .filter(isSkillDataKey)
+                .sort()
+                .map(key => `${key}:${localStorage.getItem(key)}`)
+                .join('|');
+        }
+
+        // Polling fallback used by the admin tab when event-based sync is missed.
+        function refreshAdminViewWhenSkillDataChanges() {
+            const snapshot = getSkillDataSnapshot();
+            if (snapshot === lastSkillDataSnapshot) return;
+
+            lastSkillDataSnapshot = snapshot;
             refreshAdminViewIfVisible();
         }
 
+        // Cross-tab sync event for browsers that fire localStorage change events.
+        window.addEventListener('storage', event => {
+            if (isSkillDataKey(event.key)) {
+                lastSkillDataSnapshot = getSkillDataSnapshot();
+                refreshAdminViewIfVisible();
+            }
+        });
+
+        // Cross-tab sync event for browsers that support BroadcastChannel.
+        if (skillUpdateChannel) {
+            skillUpdateChannel.onmessage = event => {
+                if (event.data?.type === 'skill-data-changed') {
+                    refreshAdminViewIfVisible();
+                }
+            };
+        }
+
+        lastSkillDataSnapshot = getSkillDataSnapshot();
+        setInterval(refreshAdminViewWhenSkillDataChanges, 1000);
+
+        /*
+            Manual status change:
+            Consultants can mark a skill Not Started/In Progress/Complete directly.
+            We also store a numeric progress value so admin aggregation is simple.
+        */
         function updateStatus(skillId, selectElement) {
             const value = selectElement.value;
             localStorage.setItem(`status_${currentUser.id}_${skillId}`, value);
@@ -962,6 +1258,11 @@
             notifySkillDataChanged();
         }
 
+        /*
+            Checklist toggle:
+            Flipping a target checkbox updates the target array. The next render
+            recalculates skill progress from completed targets.
+        */
         function toggleTarget(skillId, targetIndex) {
             const targetsJSON = localStorage.getItem(`smart_${currentUser.id}_${skillId}`);
             if (!targetsJSON) return;
@@ -974,6 +1275,34 @@
             notifySkillDataChanged();
         }
 
+        /*
+            Target deletion:
+            Removes one SMART target from the array. If no targets remain, the
+            storage key is removed to keep localStorage tidy.
+        */
+        function deleteTarget(skillId, targetIndex) {
+            const targetsJSON = localStorage.getItem(`smart_${currentUser.id}_${skillId}`);
+            if (!targetsJSON) return;
+            
+            let targets = [];
+            try { targets = JSON.parse(targetsJSON); } catch(e) { targets = []; }
+            targets.splice(targetIndex, 1);
+            
+            if (targets.length > 0) {
+                localStorage.setItem(`smart_${currentUser.id}_${skillId}`, JSON.stringify(targets));
+            } else {
+                localStorage.removeItem(`smart_${currentUser.id}_${skillId}`);
+            }
+
+            renderConsultantMatrix();
+            notifySkillDataChanged();
+        }
+
+        /*
+            Custom SMART target:
+            Lets consultants type their own development target instead of accepting
+            one of the generated templates.
+        */
         function addCustomTarget(skillId, skillName) {
             const customInput = document.getElementById(`custom-target-input-${skillId}`);
             const customText = customInput.value.trim();
@@ -1000,6 +1329,11 @@
             notifySkillDataChanged();
         }
 
+        /*
+            Generated SMART target:
+            Prototype "AI" behavior. For the hackathon demo it selects from a curated
+            list of templates and injects the current skill name.
+        */
         function generateSMART(skillId, skillName) {
             const smartTargets = [
                 `Complete the LinkedIn Learning module for "${skillName}" within 2 weeks and document 3 key takeaways.`,
@@ -1033,6 +1367,13 @@
         }
 
         // --- 6. ACADEMY LEAD DASHBOARD RENDERER ---
+        /*
+            Team dashboard:
+            Aggregates all saved consultant progress by discipline. Each discipline
+            row expands to show skill-level progress. This uses the same roleData
+            catalogue and progress keys as the consultant portal, tying the two
+            experiences together.
+        */
         function renderAdminDashboard() {
             // Set all titles to team view
             document.getElementById('heatmap-title').textContent = 'Team Skill Gap Heatmap';
@@ -1044,9 +1385,15 @@
             heatmapContainer.innerHTML = '';
 
             document.getElementById('admin-role-label').innerText = "SDET";
+            // Only consultant accounts contribute to team progress.
             const consultants = Object.values(credentials).filter(u => u.type === 'consultant');
             
             Object.entries(roleData).forEach(([roleKey, role]) => {
+                /*
+                    Calculate average progress for every skill in the discipline.
+                    Because this is frontend-only, localStorage acts as the prototype
+                    data layer. A production version would move this to a backend.
+                */
                 const skillProgress = role.skills.map(skill => {
                     const totalProgress = consultants.reduce((sum, consultant) => {
                         const storedProgress = localStorage.getItem(`progress_${consultant.id}_${skill.id}`);
@@ -1103,7 +1450,12 @@
                 heatmapContainer.appendChild(item);
             });
 
-            // Dynamically scan the database to find actual targets
+            /*
+                Active target feed:
+                Scans every consultant across every discipline and shows only goals
+                that are not yet completed. This gives Academy Leads a live queue of
+                current development commitments.
+            */
             const targetsContainer = document.getElementById('admin-targets-container');
             targetsContainer.innerHTML = '';
             let count = 0;
@@ -1144,6 +1496,11 @@
             }
         }
 
+        /*
+            Bootstrapping:
+            After all functions are defined, restoreSession decides whether to show
+            the login screen or immediately re-open the user's last session.
+        */
         restoreSession();
 
     </script>
