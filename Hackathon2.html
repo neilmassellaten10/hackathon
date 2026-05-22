@@ -280,6 +280,28 @@
         .progress-bar-fill.critical { background-color: var(--danger); }
         .progress-bar-fill.warning { background-color: var(--warning); }
 
+        /* Progress Slider Styles */
+        .skill-progress-container {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text-muted);
+        }
+        .progress-slider {
+            width: 100%;
+            margin-top: 0.5rem;
+            accent-color: var(--brand-blue); /* Modern property to color the slider */
+            cursor: pointer;
+        }
+
     </style>
 </head>
 <body>
@@ -549,13 +571,28 @@
                     // Tie the data explicitly to the logged-in user's ID
                     const status = localStorage.getItem(`status_${currentUser.id}_${skill.id}`) || 'not-started';
                     const smartTarget = localStorage.getItem(`smart_${currentUser.id}_${skill.id}`);
-                    
+                    const progress = localStorage.getItem(`progress_${currentUser.id}_${skill.id}`) || 0; // NEW: Fetch progress
                     const card = document.createElement('div');
+                    
                     card.className = 'skill-card';
                     card.innerHTML = `
                         <div class="skill-title">${skill.name}</div>
                         <div class="skill-desc">${skill.desc}</div>
                         
+                        <div class="skill-progress-container">
+                        
+                            <div class="progress-header">
+                            <span>Completion</span>
+                            <span id="progress-text-${skill.id}">${progress}%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="progress-fill-${skill.id}" class="progress-bar-fill" style="width: ${progress}%"></div>
+                        </div>
+                        <input type="range" min="0" max="100" value="${progress}" class="progress-slider" 
+                            oninput="syncProgressUI('${skill.id}', this.value)" 
+                            onchange="saveProgress('${skill.id}', this.value)">
+                        </div>
+
                         <div class="card-actions">
                             <div class="action-row">
                                 <a href="${skill.link}" target="_blank" class="btn-linkedin">
@@ -596,6 +633,30 @@
             localStorage.setItem(`status_${currentUser.id}_${skillId}`, value);
             renderConsultantMatrix(); 
         }
+        
+
+        // Updates the numbers and bar width smoothly while the user is dragging the slider
+        function syncProgressUI(skillId, value) {
+            document.getElementById(`progress-text-${skillId}`).innerText = `${value}%`;
+            document.getElementById(`progress-fill-${skillId}`).style.width = `${value}%`;
+        }
+
+        // Saves the value when the user lets go of the slider
+        function saveProgress(skillId, value) {
+            localStorage.setItem(`progress_${currentUser.id}_${skillId}`, value);
+            
+            // Optional UX Boost: Automatically update the dropdown status based on the slider!
+            let newStatus = 'not-started';
+            if (value == 100) {
+                newStatus = 'complete';
+            } else if (value > 0) {
+                newStatus = 'in-progress';
+            }
+            
+            localStorage.setItem(`status_${currentUser.id}_${skillId}`, newStatus);
+            renderConsultantMatrix(); // Re-render to update the dropdown colors and UI
+        }
+
 
         function generateSMART(skillId, skillName) {
             const deadlines = ["in 14 days", "by end of month", "within 3 weeks"];
