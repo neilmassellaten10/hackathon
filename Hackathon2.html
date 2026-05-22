@@ -7,9 +7,9 @@
     <style>
         /* Modern Color Palette & Variables */
         :root {
-            --brand-dark: #0A192F;
-            --brand-blue: #1E3A8A;
-            --brand-light: #EFF6FF;
+            --brand-dark: #2D1B4E;
+            --brand-blue: #7C3AED;
+            --brand-light: #F3E8FF;
             --text-main: #334155;
             --text-muted: #64748B;
             --success: #10B981;
@@ -70,7 +70,7 @@
             border-radius: 8px; background: var(--brand-blue); color: white; font-size: 1rem; 
             font-weight: 600; cursor: pointer; transition: background 0.2s;
         }
-        .login-btn:hover { background: #152C63; }
+        .login-btn:hover { background: #6D28D9; }
         
         .error-msg { color: var(--danger); font-size: 0.85rem; font-weight: 600; text-align: center; min-height: 20px; margin-top: 1rem; }
 
@@ -264,9 +264,43 @@
         }
         .btn-smart:hover { background-color: var(--brand-blue); color: white; }
 
-        .smart-output {
-            background-color: #F8FAFC; border-left: 4px solid var(--brand-blue); padding: 1rem;
-            font-size: 0.9rem; color: var(--text-main); border-radius: 0 8px 8px 0; margin-top: 0.5rem;
+        /* SMART Target Checklist Styles */
+        .smart-target-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .smart-target-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            background-color: #F8FAFC;
+            padding: 0.75rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--brand-blue);
+            transition: all 0.2s ease;
+        }
+        
+        .smart-target-item.completed {
+            border-left-color: var(--success);
+            opacity: 0.7;
+        }
+        
+        .smart-target-item.completed span {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+        
+        .smart-target-item input[type="checkbox"] {
+            margin-top: 0.2rem;
+            cursor: pointer;
+            width: 16px;
+            height: 16px;
+            accent-color: var(--success);
         }
 
         .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
@@ -275,12 +309,7 @@
         .heatmap-item { margin-bottom: 1.2rem; }
         .heatmap-header { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; margin-bottom: 0.4rem; }
         
-        .progress-bar-bg { background-color: var(--border); height: 12px; border-radius: 10px; overflow: hidden; }
-        .progress-bar-fill { height: 100%; background-color: var(--success); border-radius: 10px; transition: width 0.5s ease; }
-        .progress-bar-fill.critical { background-color: var(--danger); }
-        .progress-bar-fill.warning { background-color: var(--warning); }
-
-        /* Progress Slider Styles */
+        /* Progress Bar Styles */
         .skill-progress-container {
             margin-top: 1rem;
             margin-bottom: 1rem;
@@ -295,12 +324,10 @@
             margin-bottom: 0.4rem;
             color: var(--text-muted);
         }
-        .progress-slider {
-            width: 100%;
-            margin-top: 0.5rem;
-            accent-color: var(--brand-blue); /* Modern property to color the slider */
-            cursor: pointer;
-        }
+        .progress-bar-bg { background-color: var(--border); height: 12px; border-radius: 10px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background-color: var(--success); border-radius: 10px; transition: width 0.5s ease; }
+        .progress-bar-fill.critical { background-color: var(--danger); }
+        .progress-bar-fill.warning { background-color: var(--warning); }
 
     </style>
 </head>
@@ -347,6 +374,13 @@
             <button class="nav-btn active" id="btn-consultant" onclick="switchView('consultant')">Consultant Portal</button>
             <button class="nav-btn" id="btn-admin" onclick="switchView('admin')">Academy Lead</button>
             
+            <div id="consultant-selector" style="display:none; margin-top: 1.5rem; padding: 0 0.5rem;">
+                <label style="font-size: 0.75rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; display: block; margin-bottom: 0.5rem;">Select Consultant</label>
+                <select id="admin-consultant-select" onchange="renderConsultantProgressView()" style="width: 100%; padding: 0.6rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; background-color: rgba(255,255,255,0.1); color: white; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                    <option value="">-- All Consultants --</option>
+                </select>
+            </div>
+            
             <button class="logout-btn" onclick="logout()">Sign Out</button>
         </aside>
 
@@ -382,8 +416,8 @@
 
                 <div class="dashboard-grid">
                     <div class="dash-card">
-                        <h2>Team Skill Gap Heatmap</h2>
-                        <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                        <h2 id="heatmap-title">Team Skill Gap Heatmap</h2>
+                        <p id="heatmap-subtitle" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
                             Aggregated proficiency across the current selected discipline. Red indicates critical knowledge gaps across the team.
                         </p>
                         <div id="heatmap-container">
@@ -408,8 +442,8 @@
                         </div>
 
                         <div class="dash-card" style="flex-grow: 1;">
-                            <h2>Active SMART Targets</h2>
-                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
+                            <h2 id="targets-title">Active SMART Targets</h2>
+                            <p id="targets-subtitle" style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1rem;">
                                 Live feed of goals committed by your team.
                             </p>
                             <div id="admin-targets-container">
@@ -426,9 +460,8 @@
     <script>
         // --- 1. AUTHENTICATION LOGIC & DATA ISOLATION ---
         let activeLoginMode = 'consultant';
-        let currentUser = null; // Tracks the user so data isn't mixed up
+        let currentUser = null; 
         
-        // Extended Database with multiple unique profiles
         const credentials = {
             "alex.m": { id: "c_1", name: "Alex Mercer", roleKey: "sdet", type: "consultant", password: "pass123" },
             "sarah.j": { id: "c_2", name: "Sarah Jenkins", roleKey: "devops", type: "consultant", password: "pass123" },
@@ -456,7 +489,6 @@
             if (user.password !== passwordInput) { errorDiv.innerText = "Error: Incorrect password."; return; }
             if (user.type !== activeLoginMode) { errorDiv.innerText = `Error: This account does not have ${activeLoginMode} privileges.`; return; }
 
-            // Success
             errorDiv.innerText = "";
             document.getElementById('login-form').reset();
             proceedToApp(user);
@@ -471,7 +503,6 @@
                 document.getElementById('btn-consultant').style.display = 'block';
                 document.getElementById('btn-admin').style.display = 'none';
                 
-                // Dynamically set their name and their default discipline in the UI
                 document.getElementById('consultant-name-display').innerText = user.name;
                 document.getElementById('role-select').value = user.roleKey;
                 
@@ -541,8 +572,136 @@
             document.getElementById(`view-${viewId}`).classList.add('active');
             document.getElementById(`btn-${viewId}`).classList.add('active');
 
-            if (viewId === 'admin') renderAdminDashboard();
-            if (viewId === 'consultant') renderConsultantMatrix();
+            // Show/hide consultant selector
+            const consultantSelector = document.getElementById('consultant-selector');
+            if (viewId === 'admin') {
+                consultantSelector.style.display = 'block';
+                populateConsultantSelector();
+                renderAdminDashboard();
+            } else {
+                consultantSelector.style.display = 'none';
+                renderConsultantMatrix();
+            }
+        }
+
+        function populateConsultantSelector() {
+            const select = document.getElementById('admin-consultant-select');
+            const consultants = Object.values(credentials).filter(u => u.type === 'consultant');
+            
+            // Clear existing options except the first one
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+            
+            // Add consultant options
+            consultants.forEach(consultant => {
+                const option = document.createElement('option');
+                option.value = consultant.id;
+                option.textContent = consultant.name;
+                select.appendChild(option);
+            });
+        }
+
+        function renderConsultantProgressView() {
+            const selectedConsultantId = document.getElementById('admin-consultant-select').value;
+            
+            if (!selectedConsultantId) {
+                // Show the default admin dashboard
+                document.getElementById('heatmap-title').textContent = 'Team Skill Gap Heatmap';
+                document.getElementById('heatmap-subtitle').textContent = 'Aggregated proficiency across the current selected discipline. Red indicates critical knowledge gaps across the team.';
+                document.getElementById('targets-title').textContent = 'Active SMART Targets';
+                document.getElementById('targets-subtitle').textContent = 'Live feed of goals committed by your team.';
+                renderAdminDashboard();
+                return;
+            }
+            
+            // Find the selected consultant
+            const consultant = Object.values(credentials).find(u => u.id === selectedConsultantId);
+            if (!consultant) return;
+            
+            // Update titles
+            document.getElementById('heatmap-title').textContent = `${consultant.name} - Skill Progress`;
+            document.getElementById('heatmap-subtitle').textContent = `Tracking progress across ${consultant.name}'s ${consultant.roleKey.toUpperCase()} skills.`;
+            document.getElementById('targets-title').textContent = `${consultant.name} - Active Goals`;
+            document.getElementById('targets-subtitle').textContent = `SMART targets currently being worked on.`;
+            
+            const container = document.getElementById('heatmap-container');
+            container.innerHTML = '';
+            
+            const targetsContainer = document.getElementById('admin-targets-container');
+            targetsContainer.innerHTML = '';
+            
+            const role = roleData[consultant.roleKey];
+            
+            // Render skills with progress for this consultant
+            const skillsContainer = document.createElement('div');
+            skillsContainer.style.display = 'flex';
+            skillsContainer.style.flexDirection = 'column';
+            skillsContainer.style.gap = '1.5rem';
+            
+            role.skills.forEach(skill => {
+                const targetsJSON = localStorage.getItem(`smart_${consultant.id}_${skill.id}`);
+                let targets = [];
+                if (targetsJSON) {
+                    try { targets = JSON.parse(targetsJSON); } catch(e) { targets = []; }
+                }
+                
+                const completedCount = targets.filter(t => t.completed).length;
+                const progress = targets.length > 0 ? Math.round((completedCount / targets.length) * 100) : 0;
+                
+                const item = document.createElement('div');
+                item.className = 'heatmap-item';
+                item.innerHTML = `
+                    <div class="heatmap-header">
+                        <div>
+                            <div style="font-weight: 700; color: var(--text-main);">${skill.name}</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">${skill.level}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 700; color: var(--brand-blue);">${progress}%</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted);">${completedCount}/${targets.length} targets</div>
+                        </div>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: ${progress}%"></div>
+                    </div>
+                `;
+                skillsContainer.appendChild(item);
+            });
+            
+            container.appendChild(skillsContainer);
+            
+            // Show SMART targets for this consultant
+            let targetCount = 0;
+            role.skills.forEach(skill => {
+                const targetsJSON = localStorage.getItem(`smart_${consultant.id}_${skill.id}`);
+                
+                if (targetsJSON) {
+                    let targets = [];
+                    try { targets = JSON.parse(targetsJSON); } catch(e) { targets = []; }
+                    
+                    targets.forEach(target => {
+                        if (!target.completed) {
+                            targetCount++;
+                            const t = document.createElement('div');
+                            t.style.padding = "1rem";
+                            t.style.border = "1px solid var(--border)";
+                            t.style.borderRadius = "8px";
+                            t.style.marginBottom = "1rem";
+                            t.style.backgroundColor = "#F8FAFC";
+                            t.innerHTML = `
+                                <div style="font-size:0.8rem; color:var(--brand-blue); font-weight:700; text-transform:uppercase; margin-bottom:0.3rem;">${skill.name}</div>
+                                <div style="font-size:0.95rem; color:var(--text-main); font-style:italic;">"${target.text}"</div>
+                            `;
+                            targetsContainer.appendChild(t);
+                        }
+                    });
+                }
+            });
+            
+            if (targetCount === 0) {
+                targetsContainer.innerHTML = `<p style="color:var(--text-muted); font-style:italic;">No active uncompleted goals for this consultant.</p>`;
+            }
         }
 
         // --- 4. CONSULTANT VIEW RENDERER ---
@@ -568,29 +727,74 @@
                 grid.className = 'skill-grid';
 
                 levelSkills.forEach(skill => {
-                    // Tie the data explicitly to the logged-in user's ID
-                    const status = localStorage.getItem(`status_${currentUser.id}_${skill.id}`) || 'not-started';
-                    const smartTarget = localStorage.getItem(`smart_${currentUser.id}_${skill.id}`);
-                    const progress = localStorage.getItem(`progress_${currentUser.id}_${skill.id}`) || 0; // NEW: Fetch progress
-                    const card = document.createElement('div');
                     
+                    // Fetch targets as JSON array
+                    const targetsJSON = localStorage.getItem(`smart_${currentUser.id}_${skill.id}`);
+                    let targets = [];
+                    if (targetsJSON) {
+                        try { targets = JSON.parse(targetsJSON); } catch(e) { targets = []; }
+                    }
+
+                    // Dynamically compute progress based on targets checklist
+                    let progress = 0;
+                    if (targets.length > 0) {
+                        const completedCount = targets.filter(t => t.completed).length;
+                        progress = Math.round((completedCount / targets.length) * 100);
+                        
+                        // Auto-sync status based on the checklist
+                        let newStatus = 'not-started';
+                        if (progress === 100) newStatus = 'complete';
+                        else if (progress > 0) newStatus = 'in-progress';
+                        localStorage.setItem(`status_${currentUser.id}_${skill.id}`, newStatus);
+                    }
+                    
+                    // Save progress back so Admin Dashboard can potentially read it
+                    localStorage.setItem(`progress_${currentUser.id}_${skill.id}`, progress);
+                    
+                    const status = localStorage.getItem(`status_${currentUser.id}_${skill.id}`) || 'not-started';
+                    const card = document.createElement('div');
                     card.className = 'skill-card';
+                    
+                    // Generate HTML for the checklist (deduplicate targets)
+                    let targetsHTML = '';
+                    if (targets.length > 0) {
+                        // Remove duplicate targets based on text content
+                        const uniqueTargets = [];
+                        const seenTargetTexts = new Set();
+                        
+                        targets.forEach((t, index) => {
+                            if (!seenTargetTexts.has(t.text)) {
+                                seenTargetTexts.add(t.text);
+                                uniqueTargets.push({ ...t, originalIndex: index });
+                            }
+                        });
+                        
+                        targetsHTML = '<ul class="smart-target-list">';
+                        uniqueTargets.forEach((t) => {
+                            targetsHTML += `
+                                <li class="smart-target-item ${t.completed ? 'completed' : ''}">
+                                    <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="toggleTarget('${skill.id}', ${t.originalIndex})">
+                                    <span style="font-size: 0.9rem; line-height: 1.4;">${t.text}</span>
+                                </li>
+                            `;
+                        });
+                        targetsHTML += '</ul>';
+                    }
+
                     card.innerHTML = `
                         <div class="skill-title">${skill.name}</div>
                         <div class="skill-desc">${skill.desc}</div>
                         
                         <div class="skill-progress-container">
-                        
                             <div class="progress-header">
-                            <span>Completion</span>
+                            <span>Completion Based on Targets</span>
                             <span id="progress-text-${skill.id}">${progress}%</span>
                         </div>
                         <div class="progress-bar-bg">
                             <div id="progress-fill-${skill.id}" class="progress-bar-fill" style="width: ${progress}%"></div>
                         </div>
-                        <input type="range" min="0" max="100" value="${progress}" class="progress-slider" 
-                            oninput="syncProgressUI('${skill.id}', this.value)" 
-                            onchange="saveProgress('${skill.id}', this.value)">
+                        
+                        ${targetsHTML}
                         </div>
 
                         <div class="card-actions">
@@ -608,14 +812,8 @@
                             
                             ${status !== 'complete' ? `
                                 <button class="btn-smart" onclick="generateSMART('${skill.id}', '${skill.name}')">
-                                    🎯 Generate SMART Target
+                                    🎯 Add SMART Target
                                 </button>
-                            ` : ''}
-                            
-                            ${smartTarget && status !== 'complete' ? `
-                                <div class="smart-output">
-                                    <strong>Active Target:</strong><br>${smartTarget}
-                                </div>
                             ` : ''}
                         </div>
                     `;
@@ -633,48 +831,55 @@
             localStorage.setItem(`status_${currentUser.id}_${skillId}`, value);
             renderConsultantMatrix(); 
         }
-        
 
-        // Updates the numbers and bar width smoothly while the user is dragging the slider
-        function syncProgressUI(skillId, value) {
-            document.getElementById(`progress-text-${skillId}`).innerText = `${value}%`;
-            document.getElementById(`progress-fill-${skillId}`).style.width = `${value}%`;
-        }
-
-        // Saves the value when the user lets go of the slider
-        function saveProgress(skillId, value) {
-            localStorage.setItem(`progress_${currentUser.id}_${skillId}`, value);
+        function toggleTarget(skillId, targetIndex) {
+            const targetsJSON = localStorage.getItem(`smart_${currentUser.id}_${skillId}`);
+            if (!targetsJSON) return;
             
-            // Optional UX Boost: Automatically update the dropdown status based on the slider!
-            let newStatus = 'not-started';
-            if (value == 100) {
-                newStatus = 'complete';
-            } else if (value > 0) {
-                newStatus = 'in-progress';
-            }
+            const targets = JSON.parse(targetsJSON);
+            targets[targetIndex].completed = !targets[targetIndex].completed;
             
-            localStorage.setItem(`status_${currentUser.id}_${skillId}`, newStatus);
-            renderConsultantMatrix(); // Re-render to update the dropdown colors and UI
+            localStorage.setItem(`smart_${currentUser.id}_${skillId}`, JSON.stringify(targets));
+            renderConsultantMatrix(); // Re-render to update the progress bar and status
         }
-
 
         function generateSMART(skillId, skillName) {
-            const deadlines = ["in 14 days", "by end of month", "within 3 weeks"];
-            const deadline = deadlines[Math.floor(Math.random() * deadlines.length)];
+            const smartTargets = [
+                `Complete the LinkedIn Learning module for "${skillName}" within 2 weeks and document 3 key takeaways.`,
+                `Build a practical project demonstrating "${skillName}" concepts and present findings to the team within 3 weeks.`,
+                `Create a 15-minute knowledge-sharing session on "${skillName}" for the team by end of month.`,
+                `Pass a certification or assessment related to "${skillName}" by end of month.`,
+                `Mentor a peer on "${skillName}" basics and confirm understanding through hands-on demo within 3 weeks.`,
+                `Contribute code or documentation on a real project using "${skillName}" skills within 4 weeks.`,
+                `Review and analyze 2 industry best practices in "${skillName}" and share learnings with team within 3 weeks.`,
+                `Complete all practical labs in the "${skillName}" module and document challenges & solutions.`
+            ];
             
-            const goal = `I will complete the LinkedIn Learning module for "${skillName}" ${deadline}. I will validate this by implementing the concepts in a sandbox project and presenting it to my Academy Lead.`;
+            const goal = smartTargets[Math.floor(Math.random() * smartTargets.length)];
             
-            localStorage.setItem(`smart_${currentUser.id}_${skillId}`, goal);
+            // Get existing array or default to empty array
+            const targetsJSON = localStorage.getItem(`smart_${currentUser.id}_${skillId}`);
+            let targets = [];
+            if (targetsJSON) {
+                try { targets = JSON.parse(targetsJSON); } catch(e) { targets = []; }
+            }
+            
+            // Append new goal (only if it doesn't already exist)
+            if (!targets.some(t => t.text === goal)) {
+                targets.push({ text: goal, completed: false });
+            }
+            
+            // Save stringified array
+            localStorage.setItem(`smart_${currentUser.id}_${skillId}`, JSON.stringify(targets));
             renderConsultantMatrix();
         }
 
         // --- 6. ACADEMY LEAD DASHBOARD RENDERER ---
         function renderAdminDashboard() {
-            // Keep the heatmap simple (simulated team data) for demonstration
             const heatmapContainer = document.getElementById('heatmap-container');
             heatmapContainer.innerHTML = '';
 
-            const exampleRole = roleData["sdet"]; // Show an example heatmap for SDETs
+            const exampleRole = roleData["sdet"]; 
             document.getElementById('admin-role-label').innerText = "SDET";
             
             exampleRole.skills.forEach(skill => {
@@ -695,34 +900,38 @@
                 heatmapContainer.appendChild(item);
             });
 
-            // Dynamically scan the database to find actual targets set by ALL consultants
+            // Dynamically scan the database to find actual targets
             const targetsContainer = document.getElementById('admin-targets-container');
             targetsContainer.innerHTML = '';
             let count = 0;
 
-            // Loop through all users
             Object.values(credentials).filter(u => u.type === 'consultant').forEach(consultant => {
                 const assignedRole = roleData[consultant.roleKey];
                 
-                // Check all skills for targets
                 assignedRole.skills.forEach(skill => {
-                    const goal = localStorage.getItem(`smart_${consultant.id}_${skill.id}`);
-                    const status = localStorage.getItem(`status_${consultant.id}_${skill.id}`);
+                    const targetsJSON = localStorage.getItem(`smart_${consultant.id}_${skill.id}`);
                     
-                    if (goal && status !== 'complete') {
-                        count++;
-                        const t = document.createElement('div');
-                        t.style.padding = "1rem";
-                        t.style.border = "1px solid var(--border)";
-                        t.style.borderRadius = "8px";
-                        t.style.marginBottom = "1rem";
-                        t.style.backgroundColor = "#F8FAFC";
-                        // Attribute the target to the correct consultant!
-                        t.innerHTML = `
-                            <div style="font-size:0.8rem; color:var(--brand-blue); font-weight:700; text-transform:uppercase; margin-bottom:0.3rem;">${consultant.name} • ${skill.name}</div>
-                            <div style="font-size:0.95rem; color:var(--text-main); font-style:italic;">"${goal}"</div>
-                        `;
-                        targetsContainer.appendChild(t);
+                    if (targetsJSON) {
+                        let targets = [];
+                        try { targets = JSON.parse(targetsJSON); } catch(e) { targets = []; }
+                        
+                        targets.forEach(target => {
+                            // Only show uncompleted targets on the admin dashboard
+                            if (!target.completed) {
+                                count++;
+                                const t = document.createElement('div');
+                                t.style.padding = "1rem";
+                                t.style.border = "1px solid var(--border)";
+                                t.style.borderRadius = "8px";
+                                t.style.marginBottom = "1rem";
+                                t.style.backgroundColor = "#F8FAFC";
+                                t.innerHTML = `
+                                    <div style="font-size:0.8rem; color:var(--brand-blue); font-weight:700; text-transform:uppercase; margin-bottom:0.3rem;">${consultant.name} • ${skill.name}</div>
+                                    <div style="font-size:0.95rem; color:var(--text-main); font-style:italic;">"${target.text}"</div>
+                                `;
+                                targetsContainer.appendChild(t);
+                            }
+                        });
                     }
                 });
             });
