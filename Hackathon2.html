@@ -6,9 +6,8 @@
     <title>Ten10 Skills Matrix</title>
     <style>
         /*
-            PRESENTATION NOTE:
             This is a single-file prototype. HTML, CSS, mock data, and JavaScript live
-            together so the app can be opened directly in a browser during the demo.
+            together.
         */
 
         /*
@@ -87,11 +86,6 @@
         .login-btn:hover { background: #6D28D9; }
         
         .error-msg { color: var(--danger); font-size: 0.85rem; font-weight: 600; text-align: center; min-height: 20px; margin-top: 1rem; }
-
-        .demo-creds {
-            margin-top: 2rem; background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 8px; color: #94A3B8; font-size: 0.85rem; text-align: center; line-height: 1.6;
-        }
-        .demo-creds span { color: white; font-weight: 600; }
 
         /*
             Main app wrapper:
@@ -405,17 +399,6 @@
             </form>
         </div>
 
-        <!--
-            Demo-only helper credentials. In a production build, these would be
-            replaced by real authentication and should not be shown on the page.
-        -->
-        <div class="demo-creds">
-            <strong>Mock Credentials for Testing (Password: pass123):</strong><br><br>
-            Consultant 1 (SDET): <span>alex.m</span><br>
-            Consultant 2 (DevOps): <span>sarah.j</span><br>
-            Consultant 3 (BA): <span>david.c</span><br>
-            Academy Lead: <span>admin</span> / <span>admin123</span>
-        </div>
     </div>
 
     <!--
@@ -504,13 +487,13 @@
                             <h2>Registered Consultants</h2>
                             <ul style="list-style: none; padding: 0;">
                                 <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
-                                    <strong>Alex Mercer</strong> <span id="admin-role-label" style="color: var(--text-muted);">SDET</span>
+                                    <strong>Alex Mercer</strong>
                                 </li>
                                 <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
-                                    <strong>Sarah Jenkins</strong> <span style="color: var(--text-muted);">DevOps Engineer</span>
+                                    <strong>Sarah Jenkins</strong>
                                 </li>
                                 <li style="padding: 0.75rem 0; display: flex; justify-content: space-between;">
-                                    <strong>David Chen</strong> <span style="color: var(--text-muted);">Business Analyst</span>
+                                    <strong>David Chen</strong>
                                 </li>
                             </ul>
                         </div>
@@ -709,7 +692,7 @@
                     { id: "sdet_1", level: "Foundation", name: "Core Object-Oriented Programming", desc: "Understand foundational OOP concepts (Inheritance, Polymorphism, Encapsulation) in Java or C#. Ability to write basic scripts and understand codebase structure.", link: "https://www.linkedin.com/learning/java-object-oriented-programming-2" },
                     { id: "sdet_2", level: "Foundation", name: "Selenium WebDriver Basics", desc: "Ability to locate web elements using XPath/CSS selectors and automate basic browser interactions (click, sendKeys, assertions).", link: "https://www.linkedin.com/learning/learning-selenium" },
                     { id: "sdet_3", level: "Intermediate", name: "API Test Automation", desc: "Use tools like RestAssured or Postman to automate GET, POST, PUT, and DELETE requests. Validate JSON schema responses and HTTP status codes.", link: "https://www.linkedin.com/learning/api-testing-foundations" },
-                    { id: "sdet_4", level: "Intermediate", name: "CI/CD Pipeline Integration", desc: "Configure automated test suites to run autonomously within Jenkins or GitHub Actions upon code commit. Understand build triggers and artifact generation.", link: "https://www.linkedin.com/learning/learning-jenkins-2" },
+                    { id: "sdet_4", level: "Intermediate", name: "CI/CD Pipeline Integration", desc: "Configure automated test suites to run autonomously within Jenkins or GitHub Actions upon code commit. Understand build triggers and artifact generation.", link: "https://www.linkedin.com/learning/paths/getting-started-with-continuous-integration-continuous-delivery-ci-cd" },
                     { id: "sdet_5", level: "Expert", name: "Custom Framework Architecture", desc: "Design scalable automation frameworks from scratch (Page Object Model, Screenplay pattern). Implement custom reporting and parallel execution.", link: "https://www.linkedin.com/learning/test-automation-foundations" },
                     { id: "sdet_6", level: "Expert", name: "Dockerized Test Environments", desc: "Spin up isolated testing grids using Docker containers. Manage Selenium Grid dependencies and execute cross-browser tests simultaneously.", link: "https://www.linkedin.com/learning/learning-docker-2" }
                 ]
@@ -717,9 +700,9 @@
             "ba": {
                 title: "Business Analyst",
                 skills: [
-                    { id: "ba_1", level: "Foundation", name: "Requirements Elicitation", desc: "Conduct stakeholder interviews and workshops to gather distinct business requirements. Translate ambiguity into clear, actionable notes.", link: "https://www.linkedin.com/learning/business-analysis-foundations" },
+                    { id: "ba_1", level: "Foundation", name: "Requirements Elicitation", desc: "Conduct stakeholder interviews and workshops to gather distinct business requirements. Translate ambiguity into clear, actionable notes.", link: "https://www.linkedin.com/learning/requirements-elicitation-for-business-analysis-stakeholder-conversations" },
                     { id: "ba_2", level: "Foundation", name: "User Story Creation", desc: "Write concise Agile User Stories formatted as 'As a... I want to... So that...' including clear, testable Acceptance Criteria.", link: "https://www.linkedin.com/learning/agile-requirements-foundations" },
-                    { id: "ba_3", level: "Intermediate", name: "BPMN & Process Modeling", desc: "Map current state (As-Is) and future state (To-Be) business processes using standardized Business Process Model and Notation (BPMN).", link: "https://www.linkedin.com/learning/learning-bpmn" },
+                    { id: "ba_3", level: "Intermediate", name: "BPMN & Process Modeling", desc: "Map current state (As-Is) and future state (To-Be) business processes using standardized Business Process Model and Notation (BPMN).", link: "https://www.linkedin.com/learning/fundamentals-of-business-process-mapping/process-mapping-with-bpmn-diagrams?upsellOrderOrigin=default_guest_learning&trk=default_guest_learning" },
                     { id: "ba_4", level: "Intermediate", name: "Data Mapping & SQL Basics", desc: "Understand database schemas. Write basic SQL queries to extract data for business intelligence and validate data migration logic.", link: "https://www.linkedin.com/learning/sql-essential-training" },
                     { id: "ba_5", level: "Expert", name: "Enterprise Architecture Aligning", desc: "Ensure project requirements align with long-term strategic IT enterprise architecture and wider corporate governance goals.", link: "https://www.linkedin.com/learning/enterprise-architecture-foundations" }
                 ]
@@ -727,7 +710,7 @@
             "devops": {
                 title: "DevOps Engineer",
                 skills: [
-                    { id: "do_1", level: "Foundation", name: "Linux Administration & Bash", desc: "Navigate the Linux file system, manage permissions, and write automated bash scripts for routine server maintenance.", link: "https://www.linkedin.com/learning/linux-foundations" },
+                    { id: "do_1", level: "Foundation", name: "Linux Administration & Bash", desc: "Navigate the Linux file system, manage permissions, and write automated bash scripts for routine server maintenance.", link: "https://www.linkedin.com/learning/linux-foundation-certified-system-administrator-lfcs-cert-prep?upsellOrderOrigin=default_guest_learning&trk=default_guest_learning" },
                     { id: "do_2", level: "Foundation", name: "Git & Version Control Mastery", desc: "Manage complex branching strategies (GitFlow), resolve difficult merge conflicts, and enforce code review protocols.", link: "https://www.linkedin.com/learning/git-essential-training" },
                     { id: "do_3", level: "Intermediate", name: "Infrastructure as Code (Terraform)", desc: "Provision and manage cloud infrastructure using declarative HashiCorp Terraform configuration files. Understand state management.", link: "https://www.linkedin.com/learning/learning-terraform-2" },
                     { id: "do_4", level: "Expert", name: "Kubernetes Orchestration", desc: "Deploy, scale, and manage containerized applications using Kubernetes clusters. Configure pods, services, and ingress controllers.", link: "https://www.linkedin.com/learning/learning-kubernetes" }
@@ -736,16 +719,16 @@
             "manual": {
                 title: "Manual QA Tester",
                 skills: [
-                    { id: "mq_1", level: "Foundation", name: "Test Case Design Techniques", desc: "Apply Boundary Value Analysis and Equivalence Partitioning to create highly effective, optimized manual test cases.", link: "https://www.linkedin.com/learning/software-testing-foundations-test-design" },
-                    { id: "mq_2", level: "Intermediate", name: "Exploratory Testing Charters", desc: "Design structured exploratory testing sessions using time-boxed charters. Uncover edge-case defects outside the 'happy path'.", link: "https://www.linkedin.com/learning/exploratory-testing-foundations" },
+                    { id: "mq_1", level: "Foundation", name: "Test Case Design Techniques", desc: "Apply Boundary Value Analysis and Equivalence Partitioning to create highly effective, optimized manual test cases.", link: "https://www.linkedin.com/learning/programming-foundations-test-driven-development-3/writing-test-cases?upsellOrderOrigin=default_guest_learning&trk=default_guest_learning" },
+                    { id: "mq_2", level: "Intermediate", name: "Exploratory Testing Charters", desc: "Design structured exploratory testing sessions using time-boxed charters. Uncover edge-case defects outside the 'happy path'.", link: "https://www.linkedin.com/learning/software-testing-exploratory-testing?upsellOrderOrigin=default_guest_learning&trk=default_guest_learning" },
                     { id: "mq_3", level: "Expert", name: "Defect Triage Leadership", desc: "Lead defect triage meetings. Prioritize bugs based on risk-assessment matrices and negotiate fixes with development teams.", link: "https://www.linkedin.com/learning/software-testing-foundations-bug-writing-and-management" }
                 ]
             },
             "Project Management": {
                 title: "Project Manager",
                 skills: [
-                    { id: "pm_1", level: "Foundation", name: "Project Planning & Scheduling", desc: "Create comprehensive project plans using Gantt charts. Define milestones, dependencies, and resource allocation.", link: "https://www.linkedin.com/learning/what-is-scrum?upsellOrderOrigin=default_guest_learning&trk=default_guest_learning " },
-                    { id: "pm_2", level: "Intermediate", name: "Risk Management & Mitigation", desc: "Identify potential project risks, assess their impact, and develop mitigation strategies to ensure project success.", link: "https://www.linkedin.com/learning/risk-management-for-project-managers" },
+                    { id: "pm_1", level: "Foundation", name: "Project Planning & Scheduling", desc: "Create comprehensive project plans using Gantt charts. Define milestones, dependencies, and resource allocation.", link: "https://www.linkedin.com/learning/project-management-foundations-budgets-19024810?upsellOrderOrigin=default_guest_learning&trk=default_guest_learning  " },
+                    { id: "pm_2", level: "Intermediate", name: "Risk Management & Mitigation", desc: "Identify potential project risks, assess their impact, and develop mitigation strategies to ensure project success.", link: "https://www.linkedin.com/learning/strategic-project-risk-management/qualitative-analysis?upsellOrderOrigin=default_guest_learning&trk=default_guest_learning " },
                     { id: "pm_3", level: "Expert", name: "Stakeholder Communication Mastery", desc: "Craft tailored communication plans for diverse stakeholders. Manage expectations and foster collaboration across teams.", link: "https://www.linkedin.com/learning/communication" }
                 ]
             },
@@ -1384,7 +1367,6 @@
             const heatmapContainer = document.getElementById('heatmap-container');
             heatmapContainer.innerHTML = '';
 
-            document.getElementById('admin-role-label').innerText = "SDET";
             // Only consultant accounts contribute to team progress.
             const consultants = Object.values(credentials).filter(u => u.type === 'consultant');
             
