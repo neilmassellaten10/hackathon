@@ -376,7 +376,7 @@
             
             <div id="consultant-selector" style="display:none; margin-top: 1.5rem; padding: 0 0.5rem;">
                 <label style="font-size: 0.75rem; font-weight: 700; color: #94A3B8; text-transform: uppercase; display: block; margin-bottom: 0.5rem;">Select Consultant</label>
-                <select id="admin-consultant-select" onchange="renderConsultantProgressView()" style="width: 100%; padding: 0.6rem; border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; background-color: rgba(255,255,255,0.1); color: white; font-size: 0.9rem; font-weight: 600; cursor: pointer;">
+                <select id="admin-consultant-select" onchange="renderConsultantProgressView()" style="width: 100%; padding: 0.6rem; border: 2px solid var(--brand-blue); border-radius: 6px; background-color: white; color: var(--text-main); font-size: 0.9rem; font-weight: 600; cursor: pointer;">
                     <option value="">-- All Consultants --</option>
                 </select>
             </div>
@@ -426,7 +426,7 @@
 
                     <div style="display: flex; flex-direction: column; gap: 2rem;">
                         
-                        <div class="dash-card">
+                        <div class="dash-card" id="registered-consultants-card">
                             <h2>Registered Consultants</h2>
                             <ul style="list-style: none; padding: 0;">
                                 <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between;">
@@ -577,7 +577,11 @@
             if (viewId === 'admin') {
                 consultantSelector.style.display = 'block';
                 populateConsultantSelector();
+                // Reset the dropdown to default view
+                document.getElementById('admin-consultant-select').value = '';
                 renderAdminDashboard();
+                // Explicitly show registered consultants section
+                document.getElementById('registered-consultants-card').style.display = 'block';
             } else {
                 consultantSelector.style.display = 'none';
                 renderConsultantMatrix();
@@ -611,6 +615,7 @@
                 document.getElementById('heatmap-subtitle').textContent = 'Aggregated proficiency across the current selected discipline. Red indicates critical knowledge gaps across the team.';
                 document.getElementById('targets-title').textContent = 'Active SMART Targets';
                 document.getElementById('targets-subtitle').textContent = 'Live feed of goals committed by your team.';
+                document.getElementById('registered-consultants-card').style.display = 'block';
                 renderAdminDashboard();
                 return;
             }
@@ -618,6 +623,9 @@
             // Find the selected consultant
             const consultant = Object.values(credentials).find(u => u.id === selectedConsultantId);
             if (!consultant) return;
+            
+            // Hide registered consultants section for individual views
+            document.getElementById('registered-consultants-card').style.display = 'none';
             
             // Update titles
             document.getElementById('heatmap-title').textContent = `${consultant.name} - Skill Progress`;
@@ -876,6 +884,12 @@
 
         // --- 6. ACADEMY LEAD DASHBOARD RENDERER ---
         function renderAdminDashboard() {
+            // Set all titles to team view
+            document.getElementById('heatmap-title').textContent = 'Team Skill Gap Heatmap';
+            document.getElementById('heatmap-subtitle').textContent = 'Aggregated proficiency across the current selected discipline. Red indicates critical knowledge gaps across the team.';
+            document.getElementById('targets-title').textContent = 'Active SMART Targets';
+            document.getElementById('targets-subtitle').textContent = 'Live feed of goals committed by your team.';
+            
             const heatmapContainer = document.getElementById('heatmap-container');
             heatmapContainer.innerHTML = '';
 
